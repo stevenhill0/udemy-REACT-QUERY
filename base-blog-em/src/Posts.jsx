@@ -33,7 +33,7 @@ export function Posts() {
   const { data, isError, error, isLoading } = useQuery(
     ['posts', currentPage],
     () => fetchPosts(currentPage),
-    { staleTime: 2000, keepPreviousData: true }
+    { staleTime: 2000, keepPreviousData: true } // keepPreviousData: true keeps the last data in the cache  so it is there if we go back
   );
 
   if (isLoading) return <h3>Loading...</h3>;
