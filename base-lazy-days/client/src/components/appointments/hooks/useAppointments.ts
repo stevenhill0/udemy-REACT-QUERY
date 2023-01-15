@@ -1,13 +1,7 @@
 // @ts-nocheck
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
-import {
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
+import { Dispatch, SetStateAction, useCallback, useState } from 'react';
 
 import { axiosInstance } from '../../../axiosInstance';
 import { queryKeys } from '../../../react-query/constants';
@@ -15,6 +9,13 @@ import { useUser } from '../../user/hooks/useUser';
 import { AppointmentDateMap } from '../types';
 import { getAvailableAppointments } from '../utils';
 import { getMonthYearDetails, getNewMonthYear, MonthYear } from './monthYear';
+
+// Because commonOptions properties are shared between prefetchQuery and useQuery we playing them in their own object
+const commonOptions = {
+  staleTime: 0, // set to 0 so it immediately state
+  cacheTime: 300000, // going back to the default cacheTime of 5 minutes
+};
+
 // for useQuery call
 async function getAppointments(
   year: string,
@@ -85,6 +86,7 @@ export function useAppointments(): UseAppointments {
     queryClient.prefetchQuery(
       [queryKeys.appointments, nextMonthYear.year, nextMonthYear.month],
       () => getAppointments(nextMonthYear.year, nextMonthYear.month),
+      commonOptions,
     );
   }, [queryClient, nextMonthYear.year, nextMonthYear.month]);
 
@@ -101,7 +103,14 @@ export function useAppointments(): UseAppointments {
   const { data: appointments = fallback } = useQuery(
     [queryKeys.appointments, monthYear.year, monthYear.month],
     () => getAppointments(monthYear.year, monthYear.month),
-    { select: showAll ? undefined : selectFn },
+    {
+      select: showAll ? undefined : selectFn,
+      ...commonOptions, // spreading the object properties
+      refetchOnMount: true,
+      refetchOnWindowFocus: true,
+      refetchOnReconnect: true,
+      refetchInterval: 60000, // every 1 minute get data
+    },
   );
   /** ****************** END 3: useQuery  ******************************* */
 
