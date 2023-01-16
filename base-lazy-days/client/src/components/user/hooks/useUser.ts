@@ -4,6 +4,11 @@ import { AxiosResponse } from 'axios';
 import type { User } from '../../../../../shared/types';
 import { axiosInstance, getJWTHeader } from '../../../axiosInstance';
 import { queryKeys } from '../../../react-query/constants';
+import {
+  clearStoredUser,
+  getStoredUser,
+  setStoredUser,
+} from '../../../user-storage';
 
 async function getUser(user: User | null): Promise<User | null> {
   if (!user) return null;
@@ -29,7 +34,33 @@ export function useUser(): UseUser {
   // TODO: call useQuery to update user data from server
   // The user argument in getUser is whatever the user value is at that point in time
   // The value will be falsy UNTIL we update it with updateUser function below
-  const { data: user } = useQuery([queryKeys.user], () => getUser(user));
+  // The onSuccess option takes 1 arg: function
+  // The onSuccess option gets the data from EITHER the query function (useQuery 2nd arg), OR from the setQueryData function
+  // This is because onSuccess runs for EITHER useQuery function and setQueryData
+
+  // const { data: user } = useQuery([queryKeys.user], () => getUser(user), {
+  //   initialData: getStoredUser,
+  //   onSuccess: (received: User | null) => {
+  //     if (!received) {
+  //       clearStoredUser();
+  //     } else {
+  //       setStoredUser(received);
+  //     }
+  //   },
+  // });
+
+  const { data: user } = useQuery({
+    queryKey: [queryKeys.user],
+    queryFn: () => getUser(user),
+    initialData: getStoredUser,
+    onSuccess: (received: null | User) => {
+      if (!received) {
+        clearStoredUser();
+      } else {
+        setStoredUser(received);
+      }
+    },
+  });
 
   // meant to be called from useAuth
   function updateUser(newUser: User): void {
@@ -37,6 +68,8 @@ export function useUser(): UseUser {
     // setQueryData takes 2 args: arg 1: key; arg 2: value
     // It sets the value for that key in the query cache, similar how a normal query function would do it (except without the function)
     queryClient.setQueryData([queryKeys.user], newUser);
+
+    setStoredUser(newUser);
   }
 
   // meant to be called from useAuth
