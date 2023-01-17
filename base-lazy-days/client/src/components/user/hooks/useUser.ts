@@ -77,6 +77,7 @@ export function useUser(): UseUser {
     // TODO: reset user to null in query cache
     // Setting the setQueryData to null to clear the user from the cache
     queryClient.setQueryData([queryKeys.user], null);
+    queryClient.removeQueries(['user-appointments']); // Now when the user signs out, that query data will NO LONGER be available
   }
 
   return { user, updateUser, clearUser };
