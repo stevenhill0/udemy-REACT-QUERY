@@ -1,5 +1,5 @@
 import { createStandaloneToast } from '@chakra-ui/react';
-import { QueryCache, QueryClient } from '@tanstack/react-query';
+import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query';
 
 import { theme } from '../theme';
 
@@ -17,6 +17,12 @@ function queryErrorHandler(error: unknown): void {
 
 // to satisfy typescript until this file has uncommented contents
 export const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onError: queryErrorHandler,
+  }),
+  mutationCache: new MutationCache({
+    onError: queryErrorHandler,
+  }),
   defaultOptions: {
     queries: {
       staleTime: 600000, // To SUPPRESS refetching: Adding 10 minutes staleTime so data only goes stale in 10 minutes
@@ -26,7 +32,4 @@ export const queryClient = new QueryClient({
       refetchOnReconnect: false,
     },
   },
-  queryCache: new QueryCache({
-    onError: queryErrorHandler,
-  }),
 });
