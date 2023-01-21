@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import type { Appointment, User } from '../../../../../shared/types';
 import { axiosInstance, getJWTHeader } from '../../../axiosInstance';
+import { queryKeys } from '../../../react-query/constants';
 import { useUser } from './useUser';
 
 // for when we need a query function for useQuery
@@ -20,7 +21,7 @@ export function useUserAppointments(): Appointment[] {
   const fallback: Appointment[] = [];
 
   const { data: userAppointments = fallback } = useQuery(
-    ['user-appointments'],
+    [queryKeys.appointments, queryKeys.user, user?.id],
     () => getUserAppointments(user),
     // Using the enabled option. This will make sure that ONLY if the user is TRUTHY will it enable the query
     { enabled: !!user }, // Note: We are using a double bang operator to convert the user to a Boolean

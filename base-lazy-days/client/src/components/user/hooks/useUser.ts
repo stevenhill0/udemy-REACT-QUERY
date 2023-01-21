@@ -10,11 +10,17 @@ import {
   setStoredUser,
 } from '../../../user-storage';
 
-async function getUser(user: User | null): Promise<User | null> {
+// We need to get the signal to the user function so we can pass it to the axios call
+// How we get the signal: we destructure it from the arguments that useQuery passes to the query function
+async function getUser(
+  user: User | null,
+  signal: AbortSignal,
+): Promise<User | null> {
   if (!user) return null;
   const { data }: AxiosResponse<{ user: User }> = await axiosInstance.get(
     `/user/${user.id}`,
     {
+      signal, // AbortSignal from React Query
       headers: getJWTHeader(user),
     },
   );
@@ -49,9 +55,13 @@ export function useUser(): UseUser {
   //   },
   // });
 
+  // We need to get the signal to the user function so we can pass it to the axios call
+  // How we get the signal:
+  // - we destructure it from the object of arguments that useQuery passes to the query function
+  // We pass it as a second argument to getUser
   const { data: user } = useQuery({
     queryKey: [queryKeys.user],
-    queryFn: () => getUser(user),
+    queryFn: ({ signal }) => getUser(user, signal),
     initialData: getStoredUser,
     onSuccess: (received: null | User) => {
       if (!received) {
@@ -77,7 +87,7 @@ export function useUser(): UseUser {
     // TODO: reset user to null in query cache
     // Setting the setQueryData to null to clear the user from the cache
     queryClient.setQueryData([queryKeys.user], null);
-    queryClient.removeQueries(['user-appointments']); // Now when the user signs out, that query data will NO LONGER be available
+    queryClient.removeQueries([queryKeys.appointments, queryKeys.user]); // Now when the user signs out, that query data will NO LONGER be available
   }
 
   return { user, updateUser, clearUser };
