@@ -71,6 +71,7 @@
     "resetMocks": false
   },
   "devDependencies": {
-    "@tanstack/eslint-plugin-query": "^4.20.10"
+    "@tanstack/eslint-plugin-query": "^4.20.10",
+    "msw": "^0.49.3"
   }
 }
