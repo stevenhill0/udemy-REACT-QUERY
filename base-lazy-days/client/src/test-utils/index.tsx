@@ -1,19 +1,17 @@
+/* eslint-disable no-console */
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, RenderResult } from '@testing-library/react';
 import { ReactElement } from 'react';
-// import { defaultQueryClientOptions } from '../react-query/queryClient';
 
-// function to create a unique query client for each test
-const generateQueryCLient = () => {
-  return new QueryClient();
-};
+import { generateQueryClient } from '../react-query/queryClient';
+// import { defaultQueryClientOptions } from '../react-query/queryClient';
 
 // If the client was provided we use it, but if NO client we provide it with a new one
 export const renderWithQueryClient = (
   ui: ReactElement,
   client?: QueryClient,
 ): RenderResult => {
-  const queryClient = client ?? generateQueryCLient();
+  const queryClient = client ?? generateQueryClient();
 
   return render(
     <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>,
